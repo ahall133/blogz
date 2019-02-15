@@ -26,10 +26,10 @@ class User(db.Model):
     password = db.Column(db.String(120))
     blogs = db.relationship('Blog', backref='owner')
 
-    def __init__(self, username, password, blogs):
+    def __init__(self, username, password):
         self.username = username
         self.password = password
-        self.blogs = blogs
+        
 
 @app.route('/')
 def index():
