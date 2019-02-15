@@ -17,6 +17,18 @@ class Blog(db.Model):
         self.title = title
         self.body = body
 
+class User(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True)
+    username = db.Cloumn(db.String(120), unique=True)
+    password = db.Column(db.String(120))
+    tasks = db.relationship('Task', backref='owner')
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
 @app.route('/')
 def index():
     return redirect('/blog')
@@ -55,6 +67,14 @@ def new_post():
                 blog_title=blog_title, blog_body=blog_body)
     
     return render_template('newpost.html', title='New Entry')
+
+@app.route('/signup')
+
+@app.route('/login')
+
+@app.route('/index')
+
+@app.route('/logout')
 
 if  __name__ == "__main__":
     app.run()
