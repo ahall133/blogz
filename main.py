@@ -1,35 +1,8 @@
-from flask import Flask, request, redirect, render_template
-from flask_sqlalchemy import SQLAlchemy
+from flask import request, redirect, render_template
+from functions import username_func, password_func
+from app import app, db
+from models import Blog, User
 import cgi
-
-app = Flask(__name__)
-app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:password@localhost:8889/blogz'
-app.config['SQLALCHEMY_ECHO'] = True
-db = SQLAlchemy(app)
-
-class Blog(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(120))
-    body = db.Column(db.Text)
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-    def __init__(self, title, body, owner):
-        self.title = title
-        self.body = body
-        self.owner = owner
-
-class User(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(120), unique=True)
-    password = db.Column(db.String(120))
-    blogs = db.relationship('Blog', backref='owner')
-
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
-        
 
 @app.route('/')
 def index():
@@ -71,12 +44,49 @@ def new_post():
     return render_template('newpost.html', title='New Entry')
 
 @app.route('/login', methods=['POST','GET'])
-def login():
-    return render_template('login.html')
+def errors():
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:
+        username = request.form['username']
+        username = cgi.escape(username)
+        password = request.form['password']
 
+        name_error = username_func(username)
+        pass_error = password_func(password)
 
-#@app.route('/signup')
+        user_id = request.args.get('id')
+        
+        ready_to_go = None
 
+        if name_error != '' and pass_error != '':
+            return render_template('login.html', name_error=name_error, pass_error=pass_error)
+
+        if user_id == None:
+            # add href to create user account
+            return render_template('broken.html')
+        
+
+@app.route('/signup',  methods=['POST','GET'])
+def singup():
+    if request.method == 'GET':
+        return render_template('signup.html')
+    else:
+        username = request.form['username']
+        username = cgi.escape(username)
+        password = request.form['password']
+
+        user_id = request.args.get('id')
+        print(user_id)
+# 2/18/2019 MAJOR PROBLEM HERE user_id should not be 'None' as 'alec' and 'alec' are in database
+        if user_id == None:
+            new_entry = User(username, password)     
+            db.session.add(new_entry)
+            db.session.commit()        
+            return render_template('blog.html', my_login = username)
+        else:
+            return render_template('signup.html', name_error = "username already exists")
+            
 
 
 #@app.route('/index')
