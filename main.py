@@ -1,16 +1,24 @@
-from flask import request, redirect, render_template
+from flask import request, redirect, render_template, session
 from functions import username_func, password_func
 from app import app, db
 from models import Blog, User
 import cgi
 
+@app.before_request
+def require_login():
+    have_permission = ['/login', '/signup', '/blog', '/index', '/']
+    if request.endpoint not in have_permission and 'username' not in session:
+        return redirect('/login')
+
 @app.route('/')
 def index():
-    return redirect('/blog')
+    users = User.query.all()
+    return render_template('index.html', users = users)
 
 @app.route('/blog')
 def blog():
     blog_id = request.args.get('id')
+    user_id = request.args.get('user_id')
 
     if blog_id == None:
         posts = Blog.query.all()
@@ -18,6 +26,8 @@ def blog():
     else:
         post = Blog.query.get(blog_id)
         return render_template('entry.html', post=post, title='My Blog Entry')
+
+
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
@@ -54,17 +64,20 @@ def errors():
 
         name_error = username_func(username)
         pass_error = password_func(password)
+        name_
 
-        user_id = request.args.get('id')
-        
-        ready_to_go = None
+        user = User.query.filter_by(username=username).first()
 
         if name_error != '' and pass_error != '':
             return render_template('login.html', name_error=name_error, pass_error=pass_error)
 
-        if user_id == None:
-            # add href to create user account
-            return render_template('broken.html')
+        if user and user.password == password:
+            session['username'] = username
+            return redirect('/newpost')
+        if not user:
+            return render_template('login.html', name_error = )
+        if not password:
+            print("****NOT PASSWORD LINE 79****")
         
 
 @app.route('/signup',  methods=['POST','GET'])
@@ -86,12 +99,11 @@ def singup():
             return render_template('blog.html', my_login = username)
         else:
             return render_template('signup.html', name_error = "username already exists")
-            
 
-
-#@app.route('/index')
-
-#@app.route('/logout')
+@app.route('/logout')
+def logout():
+    del session['username']
+    return redirect('/blog')
 
 if __name__ == "__main__":
     app.run()

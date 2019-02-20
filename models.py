@@ -6,11 +6,11 @@ class Blog(db.Model):
     body = db.Column(db.Text)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, title, body):
+    def __init__(self, title, body, owner):
         self.title = title
         self.body = body
-#        self.owner = owner
-# also will need to add 'owner' in init line 9
+        self.owner = owner
+
 
 class User(db.Model):
 
@@ -22,3 +22,6 @@ class User(db.Model):
     def __init__(self, username, password):
         self.username = username
         self.password = password
+
+    def __repr__(self):
+        return str(self.username)
