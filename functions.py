@@ -22,5 +22,13 @@ def password_func(password):
 
     return pass_error
 
+def ver_pass_func(password, ver_password):
+    ver_pass_error = ''
+
+    if ver_password != password or len(ver_password) == 0:
+        ver_pass_error = "Your passwords do not match"
+    
+    return ver_pass_error
+
 def get_bloggers():
     User.query.all

@@ -1,5 +1,5 @@
 from flask import request, redirect, render_template, flash, session
-from functions import username_func, password_func, get_bloggers
+from functions import username_func, password_func, ver_pass_func, get_bloggers
 from app import app, db
 from models import Blog, User
 import cgi
@@ -27,8 +27,6 @@ def blog():
     else:
         post = Blog.query.get(blog_id)
         return render_template('entry.html', post=post, title='My Blog Entry')
-
-
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
@@ -70,28 +68,37 @@ def login():
         return render_template("login.html", login_error=login_error)
     else:
         return render_template('login.html')
-        
-        
-
-@app.route('/signup',  methods=['POST','GET'])
-def singup():
-    if request.method == 'GET':
-        return render_template('signup.html')
-    else:
+ 
+@app.route('/signup', methods=['POST','GET'])
+def signup():
+    if request.method == 'POST':
         username = request.form['username']
-        username = cgi.escape(username)
         password = request.form['password']
+        verify_pw = request.form['verpass']
+        user = User.query.filter_by(username=username).first()
 
-        user_id = request.args.get('id')
-        print(user_id)
-# 2/18/2019 MAJOR PROBLEM HERE user_id should not be 'None' as 'alec' and 'alec' are in database
-        if user_id == None:
-            new_entry = User(username, password)     
-            db.session.add(new_entry)
-            db.session.commit()        
-            return render_template('blog.html', my_login = username)
-        else:
-            return render_template('signup.html', name_error = "username already exists")
+        name_error = username_func(username)
+        pass_error = password_func(password)
+        ver_pass_error = ver_pass_func(password,verify_pw)
+        existing_error = "username is already taken"
+
+        if not user:
+            if name_error == '' and pass_error == '' and ver_pass_error == '':
+                new_user = User(username, password)
+                db.session.add(new_user)
+                db.session.commit()
+                session['username'] = username
+                return redirect('/newpost')
+            return render_template('signup.html', name_error = name_error, pass_error = pass_error, ver_pass_error = ver_pass_error)
+        
+        elif user:
+            return render_template('signup.html', name_error = existing_error )
+    return render_template('signup.html')
+
+        
+
+
+
 
 @app.route('/logout')
 def logout():
