@@ -6,7 +6,8 @@ import cgi
 
 @app.route('/')
 def index():
-    return redirect('blog')
+    users = get_bloggers()
+    return redirect('/blog')
 # todo: fix this
 @app.route('/blog')
 def blog():
@@ -35,7 +36,7 @@ def new_post():
         title_error = new_blog_title(blog_title)
         body_error = new_blog_body(blog_body)
         
-        owner_id = User.query.filter_by(username=session['username']).first()
+        owner_id = User.query.filter_by(username=session['user']).first()
 
         if body_error == '' and title_error == '':
             new_entry = Blog(blog_title, blog_body, owner_id)     
@@ -57,8 +58,10 @@ def login():
         login_error = "please enter a valid username and password combination"
         
         if user and user.password == password:
-            session['username'] = username
-            return redirect('/newpost')
+            session['user'] = username
+            print(username)
+# issue with redirect: 'no return statment' error. probably line 64. see same error on line 89
+            return render_template('newpost.html')
 
         return render_template("login.html", login_error=login_error)
     else:
@@ -83,6 +86,7 @@ def signup():
                 db.session.add(new_user)
                 db.session.commit()
                 session['username'] = username
+# problem right here with redirect: 'no return statement' error. probably issue with line 89. redirect issue?               
                 return redirect('/newpost')
             return render_template('signup.html', name_error = name_error, pass_error = pass_error, ver_pass_error = ver_pass_error)
         

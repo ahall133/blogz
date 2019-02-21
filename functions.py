@@ -1,5 +1,5 @@
 from flask import render_template
-from models import Blog
+from models import Blog, User
 
 def username_func(username):
     name_error = ''
