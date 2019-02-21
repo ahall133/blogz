@@ -95,11 +95,6 @@ def signup():
             return render_template('signup.html', name_error = existing_error )
     return render_template('signup.html')
 
-        
-
-
-
-
 @app.route('/logout')
 def logout():
     del session['username']
