@@ -21,3 +21,6 @@ def password_func(password):
             pass_error = "You did not enter a valid password (may not contain spaces)"
 
     return pass_error
+
+def get_bloggers():
+    User.query.all

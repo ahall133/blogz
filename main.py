@@ -1,15 +1,16 @@
-from flask import request, redirect, render_template, session
-from functions import username_func, password_func
+from flask import request, redirect, render_template, flash, session
+from functions import username_func, password_func, get_bloggers
 from app import app, db
 from models import Blog, User
 import cgi
 
-@app.before_request
-def require_login():
-    have_permission = ['/login', '/signup', '/blog', '/index', '/']
-    if request.endpoint not in have_permission and 'username' not in session:
-        return redirect('/login')
-
+#@app.before_request
+#def require_login():
+#    
+#    have_permission = ['login', 'signup', 'blog', 'index',]
+#    if request.endpoint not in have_permission and 'username' not in session:
+#        return redirect('/login')
+#THE ABOVE KEEPS GIVING ME error 302
 @app.route('/')
 def index():
     users = User.query.all()
@@ -53,31 +54,23 @@ def new_post():
     
     return render_template('newpost.html', title='New Entry')
 
-@app.route('/login', methods=['POST','GET'])
-def errors():
-    if request.method == 'GET':
-        return render_template('login.html')
-    else:
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
         username = request.form['username']
-        username = cgi.escape(username)
         password = request.form['password']
-
-        name_error = username_func(username)
-        pass_error = password_func(password)
-        name_
-
         user = User.query.filter_by(username=username).first()
 
-        if name_error != '' and pass_error != '':
-            return render_template('login.html', name_error=name_error, pass_error=pass_error)
-
+        login_error = "please enter a valid username and password combination"
+        
         if user and user.password == password:
             session['username'] = username
             return redirect('/newpost')
-        if not user:
-            return render_template('login.html', name_error = )
-        if not password:
-            print("****NOT PASSWORD LINE 79****")
+
+        return render_template("login.html", login_error=login_error)
+    else:
+        return render_template('login.html')
+        
         
 
 @app.route('/signup',  methods=['POST','GET'])
