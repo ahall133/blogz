@@ -24,9 +24,10 @@ def blog():
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
     if request.method == 'GET':
-        if 'username' not in session:
+        if 'user' not in session:
             login_error = "please enter a valid username and password combination"
             return render_template('login.html', login_error = login_error)
+        
 
     if request.method == 'POST':
         blog_title = request.form['blog-title']
