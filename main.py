@@ -1,20 +1,12 @@
-from flask import request, redirect, render_template, flash, session
+from flask import Flask, request, redirect, render_template, session
 from functions import username_func, password_func, ver_pass_func, get_bloggers, get_blogs, new_blog_title, new_blog_body
 from app import app, db
 from models import Blog, User
 import cgi
 
-#@app.before_request
-#def require_login():
-#    
-#    have_permission = ['login', 'signup', 'blog', 'index',]
-#    if request.endpoint not in have_permission and 'username' not in session:
-#        return redirect('/login')
-#THE ABOVE KEEPS GIVING ME error 302
 @app.route('/')
 def index():
-    users = User.query.all()
-    return render_template('index.html', users = users)
+    return redirect('blog')
 # todo: fix this
 @app.route('/blog')
 def blog():
@@ -31,6 +23,11 @@ def blog():
 # possibly working
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
+    if request.method == 'GET':
+        if 'username' not in session:
+            login_error = "please enter a valid username and password combination"
+            return render_template('login.html', login_error = login_error)
+
     if request.method == 'POST':
         blog_title = request.form['blog-title']
         blog_body = request.form['blog-entry']
@@ -47,7 +44,7 @@ def new_post():
         else:
             return render_template('newpost.html', title_error=title_error, body_error=body_error, blog_title=blog_title, blog_body=blog_body)
     
-    return render_template('newpost.html', title='New Entry')
+    
 # possibly working
 @app.route('/login', methods=['POST', 'GET'])
 def login():
