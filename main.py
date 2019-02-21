@@ -1,5 +1,5 @@
 from flask import request, redirect, render_template, flash, session
-from functions import username_func, password_func, ver_pass_func, get_bloggers
+from functions import username_func, password_func, ver_pass_func, get_bloggers, get_blogs, new_blog_title, new_blog_body
 from app import app, db
 from models import Blog, User
 import cgi
@@ -20,6 +20,7 @@ def index():
 def blog():
     blog_id = request.args.get('id')
     user_id = request.args.get('user_id')
+    exist_blogs = get_blogs()
 
     if blog_id == None:
         posts = Blog.query.all()
@@ -33,22 +34,18 @@ def new_post():
     if request.method == 'POST':
         blog_title = request.form['blog-title']
         blog_body = request.form['blog-entry']
-        title_error = ''
-        body_error = ''
-
-        if len(blog_title) < 1:
-            title_error = "Please enter a blog title"
-        if  len(blog_body) < 1:
-            body_error = "Please create a blog entry"
+        title_error = new_blog_title(blog_title)
+        body_error = new_blog_body(blog_body)
+        
+        owner_id = User.query.filter_by(username=session['username']).first()
 
         if body_error == '' and title_error == '':
-            new_entry = Blog(blog_title, blog_body)     
+            new_entry = Blog(blog_title, blog_body, owner_id)     
             db.session.add(new_entry)
             db.session.commit()        
             return redirect('/blog?id={}'.format(new_entry.id)) 
         else:
-            return render_template('newpost.html', title='New Entry', title_error=title_error, body_error=body_error, 
-                blog_title=blog_title, blog_body=blog_body)
+            return render_template('newpost.html', title_error=title_error, body_error=body_error, blog_title=blog_title, blog_body=blog_body)
     
     return render_template('newpost.html', title='New Entry')
 
