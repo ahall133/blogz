@@ -15,7 +15,7 @@ import cgi
 def index():
     users = User.query.all()
     return render_template('index.html', users = users)
-
+# todo: fix this
 @app.route('/blog')
 def blog():
     blog_id = request.args.get('id')
@@ -28,7 +28,7 @@ def blog():
     else:
         post = Blog.query.get(blog_id)
         return render_template('entry.html', post=post, title='My Blog Entry')
-
+# possibly working
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
     if request.method == 'POST':
@@ -48,7 +48,7 @@ def new_post():
             return render_template('newpost.html', title_error=title_error, body_error=body_error, blog_title=blog_title, blog_body=blog_body)
     
     return render_template('newpost.html', title='New Entry')
-
+# possibly working
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
@@ -65,7 +65,7 @@ def login():
         return render_template("login.html", login_error=login_error)
     else:
         return render_template('login.html')
- 
+# possibly working
 @app.route('/signup', methods=['POST','GET'])
 def signup():
     if request.method == 'POST':
@@ -91,7 +91,7 @@ def signup():
         elif user:
             return render_template('signup.html', name_error = existing_error )
     return render_template('signup.html')
-
+# probably working but not implemented in html
 @app.route('/logout')
 def logout():
     del session['username']
