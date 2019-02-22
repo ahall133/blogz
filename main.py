@@ -21,15 +21,15 @@ def blog():
     else:
         post = Blog.query.get(blog_id)
         return render_template('entry.html', post=post, title='My Blog Entry')
-# possibly working
+
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
     if request.method == 'GET':
         if 'user' not in session:
             login_error = "please enter a valid username and password combination"
             return render_template('login.html', login_error = login_error)
+        return render_template('newpost.html', username = session['user'])
         
-
     if request.method == 'POST':
         blog_title = request.form['blog-title']
         blog_body = request.form['blog-entry']
@@ -46,8 +46,6 @@ def new_post():
         else:
             return render_template('newpost.html', title_error=title_error, body_error=body_error, blog_title=blog_title, blog_body=blog_body)
     
-    
-# possibly working
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
@@ -59,14 +57,13 @@ def login():
         
         if user and user.password == password:
             session['user'] = username
-            print(username)
-# issue with redirect: 'no return statment' error. probably line 64. see same error on line 89
-            return render_template('newpost.html')
+
+            return render_template('newpost.html', username = session['user'])
 
         return render_template("login.html", login_error=login_error)
     else:
         return render_template('login.html')
-# possibly working
+
 @app.route('/signup', methods=['POST','GET'])
 def signup():
     if request.method == 'POST':
@@ -85,18 +82,20 @@ def signup():
                 new_user = User(username, password)
                 db.session.add(new_user)
                 db.session.commit()
-                session['username'] = username
-# problem right here with redirect: 'no return statement' error. probably issue with line 89. redirect issue?               
+                session['user'] = username               
                 return redirect('/newpost')
-            return render_template('signup.html', name_error = name_error, pass_error = pass_error, ver_pass_error = ver_pass_error)
-        
+            
         elif user:
             return render_template('signup.html', name_error = existing_error )
+            
+        return render_template('signup.html', name_error = name_error, pass_error = pass_error, ver_pass_error = ver_pass_error)
+
     return render_template('signup.html')
-# probably working but not implemented in html
+
 @app.route('/logout')
 def logout():
-    del session['username']
+    if 'user' in session:
+        del session['user']
     return redirect('/blog')
 
 if __name__ == "__main__":
