@@ -58,7 +58,7 @@ def login():
         if user and user.password == password:
             session['user'] = username
 
-            return render_template('newpost.html', username = session['user'])
+            return redirect('/newpost')
 
         return render_template("login.html", login_error=login_error)
     else:
