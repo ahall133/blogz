@@ -1,22 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-    
-    <h1>Build a Blog</h1>
 
-    {% if posts|length == 0 %}
-    <h2>No posts yet.</h2>
-    {% else %}
-    
-    {% for post in posts %}
-    
-    <a href="/blog?id={{post.id}}"><h2>{{post.title}}</h2></a>
-    <p>{{post.body}}</p>
-    <hr>            
-    
-    {% endfor %}  
+        <h1>Blog Posts</h1>
 
-    {% endif %}
+          {% for post in posts %}
+          <div class="post">
 
+            <a href="/blog?id={{post.id}}"><p><h2>{{ post.title }}</h2></p></a>
+            <p class="body-text">{{ post.body }}</p>
+            <p class="user">Posted by: <a href="/blog?userid={{post.owner_id}}">{{ post.owner.username }}</a></p>
+
+          </div>
+          {% endfor %}
 {% endblock %}
-

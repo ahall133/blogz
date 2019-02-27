@@ -4,23 +4,36 @@ from app import app, db
 from models import Blog, User
 import cgi
 
+
+
 @app.route('/')
 def index():
-    users = get_bloggers()
-    return redirect('/blog')
-# todo: fix this
-@app.route('/blog')
+    users = User.query.all()
+    return render_template('index.html', users = users)
+
+@app.route('/allposts')
+def all_posts():
+    posts = Blog.query.all()
+    return render_template('blog.html', posts = posts)
+
+@app.route('/blog', methods=['POST', 'GET'])
 def blog():
     blog_id = request.args.get('id')
-    user_id = request.args.get('user_id')
-    exist_blogs = get_blogs()
+    user_id = request.args.get('userid')
+    posts = Blog.query.all()
+    print("*************************************")
+    print(blog_id)
+    print(user_id)
+    print("*************************************")
 
-    if blog_id == None:
-        posts = Blog.query.all()
-        return render_template('blog.html', posts=posts, title='Build-a-blog')
-    else:
-        post = Blog.query.get(blog_id)
-        return render_template('entry.html', post=post, title='My Blog Entry')
+    if blog_id:
+        post = Blog.query.filter_by(id=blog_id).first()
+        return render_template("post.html", title=post.title, body=post.body, user=post.owner.username, user_id=post.owner_id)
+    if user_id:
+        entries = Blog.query.filter_by(owner_id=user_id).all()
+        return render_template('user.html', entries=entries)
+
+    return render_template('blog.html', posts = posts )
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
@@ -96,7 +109,7 @@ def signup():
 def logout():
     if 'user' in session:
         del session['user']
-    return redirect('/blog')
+    return redirect('/')
 
 if __name__ == "__main__":
     app.run()
